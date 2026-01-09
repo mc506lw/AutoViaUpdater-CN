@@ -1,69 +1,88 @@
-# AutoViaUpdater config
+# AutoViaUpdater config / AutoViaUpdater 配置文件
 # For understanding the difference between release and snapshot builds visit: https://ci.viaversion.com/
+# 如需了解release和snapshot构建的区别，请访问：https://ci.viaversion.com/
 # 'snapshot' chooses latest builds when available regardless if they are -SNAPSHOT or not; otherwise latest non-snapshot is used.
+# 'snapshot' 选择最新构建（无论是否为-SNAPSHOT）；否则使用最新的非SNAPSHOT构建。
 # 'dev' selects the *-DEV* Jenkins job; 'java8' selects the *-Java8* job.
+# 'dev' 选择*-DEV* Jenkins任务；'java8' 选择*-Java8*任务。
 # All of the builds here are from Jenkins. If you want to use any other source use this plugin: https://www.spigotmc.org/resources/autoupdateplugins.109683/
+# 这里的所有构建都来自Jenkins。如需使用其他来源，请使用此插件：https://www.spigotmc.org/resources/autoupdateplugins.109683/
 
-# Check-Interval setting
-# The interval (in minutes) to check for updates
+# Language settings / 语言设置
+# Available languages: zh-CN, en-US / 可用语言：zh-CN, en-US
+# You can also create your own language file in the 'lang' folder / 您也可以在'lang'文件夹中创建自己的语言文件
+Language = "zh-CN"
+
+# Check-Interval setting / 检查间隔设置
+# The interval (in minutes) to check for updates / 检查更新的间隔（分钟）
 Check-Interval = 60
 
-# Experimental Cron Support
-# Example "0 0 * * *" is daily at midnight
-# Leave it blank "" to disable and use the Check-Interval
+# Experimental Cron Support / 实验性Cron支持
+# Example "0 0 * * *" is daily at midnight / 示例 "0 0 * * *" 表示每天午夜
+# Leave it blank "" to disable and use the Check-Interval / 留空 "" 以禁用并使用Check-Interval
 Cron-Expression = ""
 
 # The number of seconds to wait after the server has fully loaded before starting the update checking process.
-# Setting this value too low may cause errors.
+# 服务器完全加载后等待的秒数，然后开始更新检查过程。
+# Setting this value too low may cause errors. / 设置此值过低可能会导致错误。
 # If errors occur while loading vias, try setting this value to 60 seconds or higher.
+# 如果加载vias时出现错误，请尝试将此值设置为60秒或更高。
 Delay = 5
 
-# AutoRestart settings
-# AutoRestart is whether or not the server will restart after an update
-# AutoRestart-Delay is the delay in seconds before restarting
-# AutoRestart-Message is the message that will be broadcasted before restarting
+# AutoRestart settings / 自动重启设置
+# AutoRestart is whether or not the server will restart after an update / AutoRestart表示服务器是否在更新后重启
+# AutoRestart-Delay is the delay in seconds before restarting / AutoRestart-Delay是重启前的延迟（秒）
+# AutoRestart-Message is the message that will be broadcasted before restarting / AutoRestart-Message是重启前广播的消息
 AutoRestart = false
 AutoRestart-Delay = 60
 AutoRestart-Message = '&cServer is restarting in 1 minute!'
 
 [ViaVersion]
 # Enable or disable ViaVersion updates (https://ci.viaversion.com/job/ViaVersion)
+# 启用或禁用ViaVersion更新
 enabled = true
 # Download the latest build, regardless of whether it's a snapshot "-SNAPSHOT" or not.
 # Otherwise, download the latest non-snapshot build.
+# 下载最新构建，无论是否为快照"-SNAPSHOT"。否则下载最新的非快照构建。
 snapshot = true
-# Enable or disable DEV channel builds from Jenkins
+# Enable or disable DEV channel builds from Jenkins / 启用或禁用Jenkins的DEV频道构建
 dev = false
-# Enable or disable Java 8 builds (https://ci.viaversion.com/job/ViaVersion-Java8/)
+# Enable or disable Java 8 builds (https://ci.viaversion.com/job/ViaVersion-Java8/) / 启用或禁用Java 8构建
 java8 = false
 
 [ViaBackwards]
 # Enable or disable ViaBackwards updates (https://ci.viaversion.com/view/ViaBackwards/job/ViaBackwards/)
+# 启用或禁用ViaBackwards更新
 enabled = true
 # Download the latest build, regardless of whether it's a snapshot "-SNAPSHOT" or not.
 # Otherwise, download the latest non-snapshot build.
+# 下载最新构建，无论是否为快照"-SNAPSHOT"。否则下载最新的非快照构建。
 snapshot = true
-# Enable or disable DEV channel builds from Jenkins
+# Enable or disable DEV channel builds from Jenkins / 启用或禁用Jenkins的DEV频道构建
 dev = false
-# Enable or disable Java 8 builds (https://ci.viaversion.com/view/ViaBackwards/job/ViaBackwards-Java8/)
+# Enable or disable Java 8 builds (https://ci.viaversion.com/view/ViaBackwards/job/ViaBackwards-Java8/) / 启用或禁用Java 8构建
 java8 = false
 
 [ViaRewind]
 # Enable or disable ViaRewind updates (https://ci.viaversion.com/view/ViaRewind/job/ViaRewind/)
+# 启用或禁用ViaRewind更新
 enabled = true
 # Download the latest build, regardless of whether it's a snapshot "-SNAPSHOT" or not.
 # Otherwise, download the latest non-snapshot build.
+# 下载最新构建，无论是否为快照"-SNAPSHOT"。否则下载最新的非快照构建。
 snapshot = true
-# Enable or disable DEV channel builds from Jenkins
+# Enable or disable DEV channel builds from Jenkins / 启用或禁用Jenkins的DEV频道构建
 dev = false
-# Enable or disable Java 8 builds (https://ci.viaversion.com/view/ViaRewind/job/ViaRewind-Java8/)
+# Enable or disable Java 8 builds (https://ci.viaversion.com/view/ViaRewind/job/ViaRewind-Java8/) / 启用或禁用Java 8构建
 java8 = false
 
 [ViaRewind-Legacy]
 # Enable or disable ViaRewind-Legacy updates. Note: Will not do anything for Bungeecord servers. (https://ci.viaversion.com/view/ViaRewind/job/ViaRewind%20Legacy%20Support/)
+# 启用或禁用ViaRewind-Legacy更新。注意：对Bungeecord服务器无效。
 enabled = true
 # Download the latest build, regardless of whether it's a snapshot "-SNAPSHOT" or not.
 # Otherwise, download the latest non-snapshot build.
+# 下载最新构建，无论是否为快照"-SNAPSHOT"。否则下载最新的非快照构建。
 snapshot = true
-# Enable or disable DEV channel builds from Jenkins
+# Enable or disable DEV channel builds from Jenkins / 启用或禁用Jenkins的DEV频道构建
 dev = false

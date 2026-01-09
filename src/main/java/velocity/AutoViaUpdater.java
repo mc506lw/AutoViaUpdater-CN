@@ -13,6 +13,7 @@ import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import common.CronScheduler;
+import common.LanguageManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -28,12 +29,11 @@ import static common.BuildYml.createYamlFile;
 import static common.BuildYml.updateBuildNumber;
 import static common.UpdateVias.updateVia;
 
-@Plugin(id = "autoviaupdater", name = "AutoViaUpdater", version = "10.0.0", url = "https://www.spigotmc.org/resources/autoviaupdater.109331/", authors = "NewAmazingPVP",
-        dependencies = {
-                @Dependency(id = "viaversion", optional = true),
-                @Dependency(id = "viabackwards", optional = true),
-                @Dependency(id = "viarewind", optional = true)
-        })
+@Plugin(id = "autoviaupdater", name = "AutoViaUpdater", version = "10.0.0", url = "https://www.spigotmc.org/resources/autoviaupdater.109331/", authors = "NewAmazingPVP", dependencies = {
+        @Dependency(id = "viaversion", optional = true),
+        @Dependency(id = "viabackwards", optional = true),
+        @Dependency(id = "viarewind", optional = true)
+})
 public final class AutoViaUpdater {
 
     private Toml config;
@@ -54,7 +54,8 @@ public final class AutoViaUpdater {
     public boolean isViaRewindJava8;
 
     private final Metrics.Factory metricsFactory;
-    private final java.util.concurrent.atomic.AtomicBoolean isChecking = new java.util.concurrent.atomic.AtomicBoolean(false);
+    private final java.util.concurrent.atomic.AtomicBoolean isChecking = new java.util.concurrent.atomic.AtomicBoolean(
+            false);
 
     @Inject
     public AutoViaUpdater(ProxyServer proxy, @DataDirectory Path dataDirectory, Metrics.Factory metricsFactory) {
@@ -69,6 +70,8 @@ public final class AutoViaUpdater {
         createYamlFile(dataDirectory.toAbsolutePath().toString(), true);
         metricsFactory.make(this, 18604);
         reloadSettings();
+        String language = config.getString("Language", "zh-CN");
+        LanguageManager.init(dataDirectory.toAbsolutePath().toString(), language);
         updateChecker();
         CommandManager commandManager = proxy.getCommandManager();
         CommandMeta commandMeta = commandManager.metaBuilder("updatevias")
@@ -100,7 +103,6 @@ public final class AutoViaUpdater {
         }
     }
 
-
     private void reloadSettings() {
         config = loadConfig(dataDirectory);
         isViaVersionEnabled = getTomlBoolean("ViaVersion", "enabled", true);
@@ -118,7 +120,8 @@ public final class AutoViaUpdater {
     }
 
     public void checkUpdateVias() {
-        if (!isChecking.compareAndSet(false, true)) return;
+        if (!isChecking.compareAndSet(false, true))
+            return;
         try {
             reloadSettings();
             if (proxy.getPluginManager().getPlugin("viaversion").orElse(null) == null) {
@@ -131,13 +134,16 @@ public final class AutoViaUpdater {
                 updateBuildNumber("ViaRewind", -1);
             }
             boolean shouldRestart = false;
-            if (isViaVersionEnabled && updatePlugin("ViaVersion", isViaVersionSnapshot, isViaVersionDev, isViaVersionJava8)) {
+            if (isViaVersionEnabled
+                    && updatePlugin("ViaVersion", isViaVersionSnapshot, isViaVersionDev, isViaVersionJava8)) {
                 shouldRestart = true;
             }
-            if (isViaBackwardsEnabled && updatePlugin("ViaBackwards", isViaBackwardsSnapshot, isViaBackwardsDev, isViaBackwardsJava8)) {
+            if (isViaBackwardsEnabled
+                    && updatePlugin("ViaBackwards", isViaBackwardsSnapshot, isViaBackwardsDev, isViaBackwardsJava8)) {
                 shouldRestart = true;
             }
-            if (isViaRewindEnabled && updatePlugin("ViaRewind", isViaRewindSnapshot, isViaRewindDev, isViaRewindJava8)) {
+            if (isViaRewindEnabled
+                    && updatePlugin("ViaRewind", isViaRewindSnapshot, isViaRewindDev, isViaRewindJava8)) {
                 shouldRestart = true;
             }
             if (shouldRestart && config.getBoolean("AutoRestart")) {
@@ -155,7 +161,8 @@ public final class AutoViaUpdater {
         }
     }
 
-    private boolean updatePlugin(String pluginName, boolean isSnapshot, boolean isDev, boolean isJava8) throws IOException {
+    private boolean updatePlugin(String pluginName, boolean isSnapshot, boolean isDev, boolean isJava8)
+            throws IOException {
         return updateVia(pluginName, dataDirectory.getParent().toString(), isSnapshot, isDev, isJava8);
     }
 
@@ -183,7 +190,8 @@ public final class AutoViaUpdater {
 
     private boolean getTomlBoolean(String table, String key, boolean def) {
         Toml t = config.getTable(table);
-        if (t == null) return def;
+        if (t == null)
+            return def;
         Boolean b = t.getBoolean(key);
         return b == null ? def : b;
     }
@@ -197,10 +205,12 @@ public final class AutoViaUpdater {
         @Override
         public void execute(Invocation invocation) {
             CommandSource source = invocation.source();
-            source.sendMessage(Component.text("Checking for Via updates...").color(NamedTextColor.YELLOW));
+            source.sendMessage(Component.text(LanguageManager.getInstance().getMessage("command.checking"))
+                    .color(NamedTextColor.YELLOW));
             proxy.getScheduler().buildTask(AutoViaUpdater.this, () -> {
                 checkUpdateVias();
-                source.sendMessage(Component.text("Update checker for vias completed!").color(NamedTextColor.AQUA));
+                source.sendMessage(Component.text(LanguageManager.getInstance().getMessage("command.completed"))
+                        .color(NamedTextColor.AQUA));
             }).schedule();
         }
     }

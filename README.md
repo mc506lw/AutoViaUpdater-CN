@@ -2,90 +2,92 @@
 
 # AutoViaUpdater v10.0.0
 
-Keep your Via stack up‑to‑date —> automatically, safely, and on schedule.
+让您的 Via 插件保持最新 —> 自动、安全、按计划更新。
 
-[![SpigotMC](https://img.shields.io/badge/SpigotMC-Resource-orange)](https://www.spigotmc.org/resources/autoviaupdater.109331/)
-![Platforms](https://img.shields.io/badge/Platforms-Spigot%20%7C%20Paper%20%7C%20Folia%20%7C%20Velocity%20%7C%20BungeeCord-5A67D8)
-![MC](https://img.shields.io/badge/Minecraft-1.8%E2%86%92Latest-2EA043)
-![Java](https://img.shields.io/badge/Java-8%2B-1F6FEB)
-![License](https://img.shields.io/badge/License-MIT-0E8A16)
+[![SpigotMC](https://img.shields.io/badge/SpigotMC-下载-orange)](https://www.spigotmc.org/resources/autoviaupdater.109331/)
+![支持平台](https://img.shields.io/badge/支持平台-Spigot%20%7C%20Paper%20%7C%20Folia%20%7C%20Velocity%20%7C%20BungeeCord-5A67D8)
+![支持版本](https://img.shields.io/badge/支持版本-1.8%E2%86%92Latest-2EA043)
+![可用Java](https://img.shields.io/badge/可用Java-8%2B-1F6FEB)
+![许可证](https://img.shields.io/badge/许可证-MIT-0E8A16)
 
 </div>
 
-> TL;DR
-> Drop in the jar ➜ it checks Jenkins and updates ViaVersion / ViaBackwards / ViaRewind (and ViaRewind‑Legacy on Spigot)
-> on a schedule. Snapshots optional, DEV and Java8 jobs supported.
+> 插件由mc506lw进行二改和翻译
+
+> 简而言之
+> 放入 jar 文件 ➜ 它会检查 Jenkins 并按计划更新 ViaVersion / ViaBackwards / ViaRewind（以及 Spigot 上的 ViaRewind-Legacy）。
+> 可选快照版本，支持 DEV 和 Java8 构建任务。
 
 ---
 
-## Table of Contents
+## 目录
 
-* [Highlights](#highlights)
-* [What It Updates](#what-it-updates)
-* [Platforms & Requirements](#platforms--requirements)
-* [Installation](#installation)
-* [Quick Start](#quick-start)
-* [Configuration](#configuration)
+* [亮点](#亮点)
+* [更新内容](#更新内容)
+* [平台与要求](#平台与要求)
+* [安装](#安装)
+* [快速开始](#快速开始)
+* [配置](#配置)
     * [Spigot/Bungee (`config.yml`)](#spigotbungee-configyml)
     * [Velocity (`config.toml`)](#velocity-configtoml)
-    * [Scheduling Cheat Sheet](#scheduling-cheat-sheet)
-* [Commands & Permissions](#commands--permissions)
-* [How It Works](#how-it-works)
-* [Troubleshooting & FAQ](#troubleshooting--faq)
-* [Building from Source](#building-from-source)
-* [Changelog Highlights](#changelog-highlights)
+    * [定时任务](#定时任务)
+* [命令与权限](#命令与权限)
+* [工作原理](#工作原理)
+* [故障排除与常见问题](#故障排除与常见问题)
+* [从源码构建](#从源码构建)
+* [更新日志亮点](#更新日志亮点)
 
 ---
 
-## Highlights
+## 亮点
 
-* Automatic updates for the Via ecosystem from Jenkins.
-* Snapshot handling you control: newest overall vs newest non‑snapshot.
-* DEV and Java 8 job support per plugin.
-* Simple interval or UNIX cron scheduling, plus a boot delay.
-* Safe restarts: optional broadcast and delayed shutdown.
+* 从 Jenkins 自动更新 Via 生态系统插件。
+* 可控制的快照处理：最新的整体版本 vs 最新的非快照版本。
+* 每个插件支持 DEV 和 Java 8 构建任务。
+* 简单的时间间隔或 UNIX cron 调度，加上启动延迟。
+* 安全重启：可选的广播和延迟关机。
 
-## What It Updates
+## 更新内容
 
 * ViaVersion
 * ViaBackwards
 * ViaRewind
-* ViaRewind Legacy Support (Spigot only)
+* ViaRewind Legacy Support（仅限 Spigot）
 
-## Platforms & Requirements
+## 平台与要求
 
-* Platforms: Spigot, Paper, Folia; Velocity; BungeeCord
-* Minecraft: 1.8 → Latest
-* Java: 8+
+* 平台：Spigot、Paper、Folia；Velocity；BungeeCord
+* Minecraft：1.8 → 最新版本
+* Java：8+
 
-## Installation
+## 安装
 
-1. Download the latest release from Spigot.
-2. Place the jar in your server’s `plugins/` folder (on proxies, use the proxy’s `plugins/`).
-3. Start the server to generate config files and `versions.yml`.
-4. Adjust settings and restart.
+1. 从 Spigot 下载最新版本。
+2. 将 jar 文件放入服务器的 `plugins/` 文件夹（在代理服务器上，使用代理服务器的 `plugins/`）。
+3. 启动服务器以生成配置文件和 `versions.yml`。
+4. 调整设置并重启。
 
-## Quick Start
+## 快速开始
 
-* Run `/updatevias` to check immediately.
-* Leave `snapshot: true` to always take the newest build; set `false` to take the newest non‑snapshot.
-* Flip `dev` or `java8` on a per‑plugin basis as needed.
+* 运行 `/updatevias` 立即检查更新。
+* 保持 `snapshot: true` 以始终获取最新构建；设置为 `false` 以获取最新的非快照版本。
+* 根据需要为每个插件启用 `dev` 或 `java8`。
 
-## Configuration
+## 配置
 
-Config files live here:
+配置文件位于：
 
-* Spigot/Bungee: `plugins/AutoViaUpdater/config.yml`
-* Velocity: `plugins/AutoViaUpdater/config.toml`
+* Spigot/Bungee：`plugins/AutoViaUpdater/config.yml`
+* Velocity：`plugins/AutoViaUpdater/config.toml`
 
 ### Spigot/Bungee (`config.yml`)
 
 ```yaml
 ViaVersion:
   enabled: true
-  snapshot: true   # newest overall; false = newest non-snapshot
-  dev: false       # use Jenkins -DEV job
-  java8: false     # use Jenkins -Java8 job
+  snapshot: true   # 最新整体版本；false = 最新非快照版本
+  dev: false       # 使用 Jenkins -DEV 构建任务
+  java8: false     # 使用 Jenkins -Java8 构建任务
 
 ViaBackwards:
   enabled: true
@@ -100,19 +102,19 @@ ViaRewind:
   java8: false
 
 ViaRewind-Legacy:
-  enabled: true    # Spigot only
+  enabled: true    # 仅限 Spigot
   snapshot: true
-  dev: false       # DEV path uses "...%20Support%20DEV" under ViaRewind view
+  dev: false       # DEV 路径使用 ViaRewind 视图下的 "...%20Support%20DEV"
 
-# Scheduling
-Check-Interval: 60        # minutes; used when cron is blank
-Cron-Expression: ""       # UNIX cron (5 fields); overrides interval when set
-Delay: 5                  # seconds after boot before first check
+# 调度
+Check-Interval: 60        # 分钟；当 cron 为空时使用
+Cron-Expression: ""       # UNIX cron（5 个字段）；设置后覆盖间隔
+Delay: 5                  # 启动后首次检查前的延迟（秒）
 
-# Optional safe restart after successful update
+# 成功更新后可选的安全重启
 AutoRestart: false
 AutoRestart-Delay: 60
-AutoRestart-Message: '&cServer is restarting in 1 minute!'
+AutoRestart-Message: '&c服务器将在 1 分钟后重启！'
 ```
 
 ### Velocity (`config.toml`)
@@ -124,7 +126,7 @@ Delay = 5
 
 AutoRestart = false
 AutoRestart-Delay = 60
-AutoRestart-Message = '&cServer is restarting in 1 minute!'
+AutoRestart-Message = '&c服务器将在 1 分钟后重启！'
 
 [ViaVersion]
 enabled = true
@@ -144,62 +146,60 @@ snapshot = true
 dev = false
 java8 = false
 
-# ViaRewind-Legacy is Spigot-only; Velocity ignores it
+# ViaRewind-Legacy 仅限 Spigot；Velocity 会忽略它
 ```
 
-### Scheduling Cheat Sheet
+### 定时任务
 
-* Every 2 hours: `0 */2 * * *`
-* Every day at 05:00: `0 5 * * *`
-* Every 15 minutes: `*/15 * * * *`
+* 每 2 小时：`0 */2 * * *`
+* 每天 05:00：`0 5 * * *`
+* 每 15 分钟：`*/15 * * * *`
 
-If the cron is blank, the plugin uses `Check-Interval` (minutes) with an initial `Delay` (seconds).
+如果 cron 为空，插件将使用 `Check-Interval`（分钟）和初始 `Delay`（秒）。
 
-## Commands & Permissions
+## 命令与权限
 
-* `/updatevias` — triggers an immediate check
-* Permission: `autoviaupdater.admin` (required on Velocity/Bungee; OP on Spigot by default)
+* `/updatevias` — 立即触发检查
+* 权限：`autoviaupdater.admin`（在 Velocity/Bungee 上需要；在 Spigot 上默认为 OP）
 
-## How It Works
+## 工作原理
 
-* The plugin calls the Jenkins API for each selected job.
-* Selection:
-    * Snapshot ON → newest build overall (regardless of "-SNAPSHOT").
-    * Snapshot OFF → newest non‑snapshot build.
-    * DEV/Java8 flags pick the `-DEV` / `-Java8` jobs when available.
-* Download:
-    * New jar goes to `plugins/`. If a matching jar exists, it is staged to `plugins/update/` for a clean swap on
-      restart.
-* Tracking:
-    * Last installed build numbers are saved in `plugins/AutoViaUpdater/versions.yml`.
+* 插件为每个选定的构建任务调用 Jenkins API。
+* 选择：
+    * 快照开启 → 最新整体构建（无论是否为 "-SNAPSHOT"）。
+    * 快照关闭 → 最新非快照构建。
+    * DEV/Java8 标志在可用时选择 `-DEV` / `-Java8` 构建任务。
+* 下载：
+    * 新的 jar 文件进入 `plugins/`。如果存在匹配的 jar 文件，它将被暂存到 `plugins/update/` 以便在重启时进行干净的替换。
+* 跟踪：
+    * 最后安装的构建号保存在 `plugins/AutoViaUpdater/versions.yml` 中。
 
-Jenkins shortcuts
+Jenkins 快捷链接
 
-* ViaVersion DEV: `https://ci.viaversion.com/job/ViaVersion-DEV/`
-* ViaBackwards DEV: `https://ci.viaversion.com/view/ViaBackwards/job/ViaBackwards-DEV/`
-* ViaRewind DEV: `https://ci.viaversion.com/view/ViaRewind/job/ViaRewind-DEV/`
-* ViaRewind Legacy Support DEV: `https://ci.viaversion.com/view/ViaRewind/job/ViaRewind%20Legacy%20Support%20DEV/`
+* ViaVersion DEV：`https://ci.viaversion.com/job/ViaVersion-DEV/`
+* ViaBackwards DEV：`https://ci.viaversion.com/view/ViaBackwards/job/ViaBackwards-DEV/`
+* ViaRewind DEV：`https://ci.viaversion.com/view/ViaRewind/job/ViaRewind-DEV/`
+* ViaRewind Legacy Support DEV：`https://ci.viaversion.com/view/ViaRewind/job/ViaRewind%20Legacy%20Support%20DEV/`
 
-## Troubleshooting & FAQ
+## 故障排除与常见问题
 
-* Nothing updated — Make sure the target Via plugin is installed (the updater replaces what exists).
-* Wrong channel — Check `snapshot/dev/java8` flags for the specific plugin.
-* Downloaded but not applied — Enable `AutoRestart` or restart manually. If `plugins/update` exists, jars move on
-  restart.
-* Build not found — Jenkins may be down or the job moved. Try `/updatevias` again or verify the job URL.
+* 没有更新 — 确保目标 Via 插件已安装（更新器会替换现有的插件）。
+* 错误的渠道 — 检查特定插件的 `snapshot/dev/java8` 标志。
+* 已下载但未应用 — 启用 `AutoRestart` 或手动重启。如果 `plugins/update` 存在，jar 文件将在重启时移动。
+* 未找到构建 — Jenkins 可能宕机或构建任务已移动。尝试再次运行 `/updatevias` 或验证构建任务 URL。
 
-## Building from Source
+## 从源码构建
 
 ```bash
 mvn -DskipTests package
 ```
 
-Grab the shaded jar from `target/`.
+从 `target/` 获取打包后的 jar 文件。
 
-## Changelog Highlights
+## 更新日志亮点
 
-* Folia‑safe scheduling and strict Bukkit access on Spigot.
-* Clear snapshot selection rules (newest overall vs non‑snapshot only).
-* Correct DEV job for ViaVersion and ViaRewind Legacy Support.
-* Human‑friendly filename for ViaRewind‑Legacy‑Support.
-* HTTP timeouts and improved error handling.
+* Folia 安全调度和 Spigot 上的严格 Bukkit 访问。
+* 清晰的快照选择规则（最新整体版本 vs 仅非快照版本）。
+* 正确的 ViaVersion 和 ViaRewind Legacy Support 的 DEV 构建任务。
+* ViaRewind-Legacy-Support 的人性化文件名。
+* HTTP 超时和改进的错误处理。

@@ -1,6 +1,7 @@
 package spigot;
 
 import common.CronScheduler;
+import common.LanguageManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -46,6 +47,8 @@ public final class AutoViaUpdater extends JavaPlugin {
         loadConfiguration();
         createYamlFile(getDataFolder().getAbsolutePath(), false);
         reloadSettings();
+        String language = config.getString("Language", "zh-CN");
+        LanguageManager.init(getDataFolder().getAbsolutePath(), language);
         ThreadFactory tf = r -> {
             Thread t = new Thread(r, "AutoViaUpdater-Worker");
             t.setDaemon(true);
@@ -93,7 +96,8 @@ public final class AutoViaUpdater extends JavaPlugin {
     }
 
     public void checkUpdateVias() {
-        if (!isChecking.compareAndSet(false, true)) return;
+        if (!isChecking.compareAndSet(false, true))
+            return;
         try {
             reloadSettings();
             AtomicBoolean hasVV = new AtomicBoolean(false);
@@ -106,21 +110,29 @@ public final class AutoViaUpdater extends JavaPlugin {
                 hasVR.set(Bukkit.getPluginManager().getPlugin("ViaRewind") != null);
                 hasVRL.set(Bukkit.getPluginManager().getPlugin("ViaRewind-Legacy-Support") != null);
             }, 10, TimeUnit.SECONDS);
-            if (!hasVV.get()) updateBuildNumber("ViaVersion", -1);
-            if (!hasVB.get()) updateBuildNumber("ViaBackwards", -1);
-            if (!hasVR.get()) updateBuildNumber("ViaRewind", -1);
-            if (!hasVRL.get()) updateBuildNumber("ViaRewind%20Legacy%20Support", -1);
+            if (!hasVV.get())
+                updateBuildNumber("ViaVersion", -1);
+            if (!hasVB.get())
+                updateBuildNumber("ViaBackwards", -1);
+            if (!hasVR.get())
+                updateBuildNumber("ViaRewind", -1);
+            if (!hasVRL.get())
+                updateBuildNumber("ViaRewind%20Legacy%20Support", -1);
             boolean shouldRestart = false;
-            if (isViaVersionEnabled && updatePlugin("ViaVersion", isViaVersionSnapshot, isViaVersionDev, isViaVersionJava8)) {
+            if (isViaVersionEnabled
+                    && updatePlugin("ViaVersion", isViaVersionSnapshot, isViaVersionDev, isViaVersionJava8)) {
                 shouldRestart = true;
             }
-            if (isViaBackwardsEnabled && updatePlugin("ViaBackwards", isViaBackwardsSnapshot, isViaBackwardsDev, isViaBackwardsJava8)) {
+            if (isViaBackwardsEnabled
+                    && updatePlugin("ViaBackwards", isViaBackwardsSnapshot, isViaBackwardsDev, isViaBackwardsJava8)) {
                 shouldRestart = true;
             }
-            if (isViaRewindEnabled && updatePlugin("ViaRewind", isViaRewindSnapshot, isViaRewindDev, isViaRewindJava8)) {
+            if (isViaRewindEnabled
+                    && updatePlugin("ViaRewind", isViaRewindSnapshot, isViaRewindDev, isViaRewindJava8)) {
                 shouldRestart = true;
             }
-            if (isViaRewindLegacyEnabled && updatePlugin("ViaRewind%20Legacy%20Support", isViaRewindLegacySnapshot, isViaRewindLegacyDev, false)) {
+            if (isViaRewindLegacyEnabled && updatePlugin("ViaRewind%20Legacy%20Support", isViaRewindLegacySnapshot,
+                    isViaRewindLegacyDev, false)) {
                 shouldRestart = true;
             }
             if (shouldRestart && config.getBoolean("AutoRestart")) {
@@ -136,7 +148,8 @@ public final class AutoViaUpdater extends JavaPlugin {
         }
     }
 
-    private boolean updatePlugin(String pluginName, boolean isSnapshot, boolean isDev, boolean isJava8) throws IOException {
+    private boolean updatePlugin(String pluginName, boolean isSnapshot, boolean isDev, boolean isJava8)
+            throws IOException {
         return updateVia(pluginName, getDataFolder().getParent(), isSnapshot, isDev, isJava8);
     }
 
@@ -179,11 +192,12 @@ public final class AutoViaUpdater extends JavaPlugin {
 
         @Override
         public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-            sender.sendMessage(ChatColor.YELLOW + "Checking for Via updates...");
+            sender.sendMessage(ChatColor.YELLOW + LanguageManager.getInstance().getMessage("command.checking"));
             executor.execute(() -> {
                 checkUpdateVias();
                 SchedulerAdapter.runGlobal(AutoViaUpdater.this,
-                        () -> sender.sendMessage(ChatColor.AQUA + "Update checker for vias completed!"));
+                        () -> sender.sendMessage(
+                                ChatColor.AQUA + LanguageManager.getInstance().getMessage("command.completed")));
             });
             return true;
         }

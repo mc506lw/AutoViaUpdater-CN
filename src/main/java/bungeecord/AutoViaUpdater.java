@@ -1,6 +1,7 @@
 package bungeecord;
 
 import common.CronScheduler;
+import common.LanguageManager;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
@@ -23,7 +24,8 @@ import static common.UpdateVias.updateVia;
 public final class AutoViaUpdater extends Plugin {
 
     private Configuration config;
-    private final java.util.concurrent.atomic.AtomicBoolean isChecking = new java.util.concurrent.atomic.AtomicBoolean(false);
+    private final java.util.concurrent.atomic.AtomicBoolean isChecking = new java.util.concurrent.atomic.AtomicBoolean(
+            false);
     public boolean isViaVersionEnabled;
     public boolean isViaVersionDev;
     public boolean isViaVersionSnapshot;
@@ -44,6 +46,8 @@ public final class AutoViaUpdater extends Plugin {
         loadConfiguration();
         createYamlFile(getDataFolder().getAbsolutePath(), true);
         reloadSettings();
+        String language = config.getString("Language", "zh-CN");
+        LanguageManager.init(getDataFolder().getAbsolutePath(), language);
         updateChecker();
         ProxyServer.getInstance().getPluginManager().registerCommand(this, new UpdateCommand());
     }
@@ -55,12 +59,12 @@ public final class AutoViaUpdater extends Plugin {
 
         if (!cronExpression.isEmpty()) {
             CronScheduler scheduler = new CronScheduler(cronExpression);
-            getProxy().getScheduler().schedule(this, () -> scheduler.runIfDue(v -> checkUpdateVias()), delay, 1, TimeUnit.SECONDS);
+            getProxy().getScheduler().schedule(this, () -> scheduler.runIfDue(v -> checkUpdateVias()), delay, 1,
+                    TimeUnit.SECONDS);
         } else {
             getProxy().getScheduler().schedule(this, this::checkUpdateVias, delay, interval * 60, TimeUnit.SECONDS);
         }
     }
-
 
     private void saveDefaultConfig() {
         File file = new File(getDataFolder(), "config.yml");
@@ -100,7 +104,8 @@ public final class AutoViaUpdater extends Plugin {
     }
 
     public void checkUpdateVias() {
-        if (!isChecking.compareAndSet(false, true)) return;
+        if (!isChecking.compareAndSet(false, true))
+            return;
         try {
             reloadSettings();
             if (getProxy().getPluginManager().getPlugin("ViaVersion") == null) {
@@ -113,20 +118,25 @@ public final class AutoViaUpdater extends Plugin {
                 updateBuildNumber("ViaRewind", -1);
             }
             boolean shouldRestart = false;
-            if (isViaVersionEnabled && updatePlugin("ViaVersion", isViaVersionSnapshot, isViaVersionDev, isViaVersionJava8)) {
+            if (isViaVersionEnabled
+                    && updatePlugin("ViaVersion", isViaVersionSnapshot, isViaVersionDev, isViaVersionJava8)) {
                 shouldRestart = true;
             }
-            if (isViaBackwardsEnabled && updatePlugin("ViaBackwards", isViaBackwardsSnapshot, isViaBackwardsDev, isViaBackwardsJava8)) {
+            if (isViaBackwardsEnabled
+                    && updatePlugin("ViaBackwards", isViaBackwardsSnapshot, isViaBackwardsDev, isViaBackwardsJava8)) {
                 shouldRestart = true;
             }
-            if (isViaRewindEnabled && updatePlugin("ViaRewind", isViaRewindSnapshot, isViaRewindDev, isViaRewindJava8)) {
+            if (isViaRewindEnabled
+                    && updatePlugin("ViaRewind", isViaRewindSnapshot, isViaRewindDev, isViaRewindJava8)) {
                 shouldRestart = true;
             }
             if (shouldRestart && config.getBoolean("AutoRestart")) {
                 String raw = config.getString("AutoRestart-Message");
-                String colored = net.md_5.bungee.api.ChatColor.translateAlternateColorCodes('&', raw == null ? "" : raw);
+                String colored = net.md_5.bungee.api.ChatColor.translateAlternateColorCodes('&',
+                        raw == null ? "" : raw);
                 getProxy().broadcast(colored);
-                getProxy().getScheduler().schedule(this, () -> getProxy().stop(), config.getLong("AutoRestart-Delay"), TimeUnit.SECONDS);
+                getProxy().getScheduler().schedule(this, () -> getProxy().stop(), config.getLong("AutoRestart-Delay"),
+                        TimeUnit.SECONDS);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -135,7 +145,8 @@ public final class AutoViaUpdater extends Plugin {
         }
     }
 
-    private boolean updatePlugin(String pluginName, boolean isSnapshot, boolean isDev, boolean isJava8) throws IOException {
+    private boolean updatePlugin(String pluginName, boolean isSnapshot, boolean isDev, boolean isJava8)
+            throws IOException {
         return updateVia(pluginName, getDataFolder().getParent(), isSnapshot, isDev, isJava8);
     }
 
@@ -147,10 +158,10 @@ public final class AutoViaUpdater extends Plugin {
 
         @Override
         public void execute(CommandSender sender, String[] args) {
-            sender.sendMessage(ChatColor.YELLOW + "Checking for Via updates...");
+            sender.sendMessage(ChatColor.YELLOW + LanguageManager.getInstance().getMessage("command.checking"));
             getProxy().getScheduler().runAsync(AutoViaUpdater.this, () -> {
                 checkUpdateVias();
-                sender.sendMessage(ChatColor.AQUA + "Update checker for vias completed!");
+                sender.sendMessage(ChatColor.AQUA + LanguageManager.getInstance().getMessage("command.completed"));
             });
         }
     }

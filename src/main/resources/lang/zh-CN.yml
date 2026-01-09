@@ -1,0 +1,23 @@
+command:
+  checking: "正在检查 Via 插件更新..."
+  completed: "Via 插件更新检查完成！"
+
+download:
+  first_time: "{plugin} 已首次下载。请重启服务器以使插件生效。"
+  new_version: "{plugin} 的新版本已下载。请重启服务器。"
+  error: "下载 {plugin} 新版本时出错：{error}"
+
+jenkins:
+  no_build_found: "AutoViaUpdater: 未找到 {jobPath} 的匹配构建"
+
+yaml:
+  build_updated: "{key} 构建号已更新为 {build}"
+  key_not_found: "YAML 文件中未找到 {key}。您是否修改了 versions.yml 文件？请重新生成它。"
+  invalid_format: "无效的 YAML 文件格式。期望为 Map 类型。您是否修改了 versions.yml 文件？请重新生成它。"
+  read_error: "读取 YAML 文件时出错。您是否修改了 versions.yml 文件？请重新生成它。"
+
+plugin_names:
+  viaversion: "ViaVersion"
+  viabackwards: "ViaBackwards"
+  viarewind: "ViaRewind"
+  viarewind_legacy: "ViaRewind-Legacy-Support"

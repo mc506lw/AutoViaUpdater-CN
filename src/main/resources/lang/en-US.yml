@@ -1,0 +1,23 @@
+command:
+  checking: "Checking for Via updates..."
+  completed: "Update checker for vias completed!"
+
+download:
+  first_time: "{plugin} was downloaded for the first time. Please restart to let the plugin take effect."
+  new_version: "New version of {plugin} downloaded. Please restart the server."
+  error: "Error downloading new version of {plugin}: {error}"
+
+jenkins:
+  no_build_found: "AutoViaUpdater: no matching build found for {jobPath}"
+
+yaml:
+  build_updated: "{key} build number updated to {build}"
+  key_not_found: "{key} not found in the YAML file. Did you touch the versions.yml file? Regenerate it."
+  invalid_format: "Invalid YAML file format. Expected a Map. Did you touch the versions.yml file? Regenerate it."
+  read_error: "Error reading YAML file. Did you touch the versions.yml file? Regenerate it."
+
+plugin_names:
+  viaversion: "ViaVersion"
+  viabackwards: "ViaBackwards"
+  viarewind: "ViaRewind"
+  viarewind_legacy: "ViaRewind-Legacy-Support"

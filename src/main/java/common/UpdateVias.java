@@ -18,7 +18,8 @@ public class UpdateVias {
     private static String directory;
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    public static boolean updateVia(String viaName, String dataDirectory, boolean wantSnapshot, boolean isDev, boolean isJava8) throws IOException {
+    public static boolean updateVia(String viaName, String dataDirectory, boolean wantSnapshot, boolean isDev,
+            boolean isJava8) throws IOException {
         directory = dataDirectory;
 
         String jobPath;
@@ -40,7 +41,7 @@ public class UpdateVias {
 
         int latestBuild = getLatestBuild(jobPath, wantSnapshot);
         if (latestBuild == -1) {
-            System.err.println("AutoViaUpdater: no matching build found for " + jobPath);
+            System.err.println(LanguageManager.getInstance().getMessage("jenkins.no_build_found", "jobPath", jobPath));
             return false;
         }
 
@@ -49,7 +50,8 @@ public class UpdateVias {
         if (getDownloadedBuild(buildKey) == -1) {
             downloadUpdate(jobPath, latestBuild, localFileName);
             updateBuildNumber(buildKey, latestBuild);
-            System.out.println(localFileName + " was downloaded for the first time. " + "Please restart to let the plugin take effect.");
+            String displayName = getDisplayName(localFileName);
+            System.out.println(LanguageManager.getInstance().getMessage("download.first_time", "plugin", displayName));
             return true;
 
         } else if (getDownloadedBuild(buildKey) != latestBuild) {
@@ -61,18 +63,36 @@ public class UpdateVias {
         return false;
     }
 
+    private static String getDisplayName(String fileName) {
+        if (fileName.contains("ViaVersion")) {
+            return LanguageManager.getInstance().getMessage("plugin_names.viaversion");
+        } else if (fileName.contains("ViaBackwards")) {
+            return LanguageManager.getInstance().getMessage("plugin_names.viabackwards");
+        } else if (fileName.contains("ViaRewind")) {
+            if (fileName.contains("Legacy")) {
+                return LanguageManager.getInstance().getMessage("plugin_names.viarewind_legacy");
+            }
+            return LanguageManager.getInstance().getMessage("plugin_names.viarewind");
+        }
+        return fileName;
+    }
+
     private static int getLatestBuild(String jobPath, boolean wantSnapshot) throws IOException {
         String listUrl = "https://ci.viaversion.com/" + jobPath + "/api/json?tree=builds[number]";
         ArrayNode builds = (ArrayNode) readJson(listUrl).get("builds");
-        if (builds == null) return -1;
+        if (builds == null)
+            return -1;
 
         for (JsonNode b : builds) {
             int num = b.get("number").asInt();
             String file = getArtifactFileName(jobPath, num);
-            if (file == null) continue;
+            if (file == null)
+                continue;
             boolean isSnap = file.contains("-SNAPSHOT");
-            if (wantSnapshot) return num;
-            if (!isSnap) return num;
+            if (wantSnapshot)
+                return num;
+            if (!isSnap)
+                return num;
         }
         return -1;
     }
@@ -80,11 +100,13 @@ public class UpdateVias {
     private static String getArtifactFileName(String jobPath, int build) throws IOException {
         String url = "https://ci.viaversion.com/" + jobPath + "/" + build + "/api/json";
         ArrayNode artifacts = (ArrayNode) readJson(url).get("artifacts");
-        if (artifacts == null) return null;
+        if (artifacts == null)
+            return null;
 
         for (JsonNode art : artifacts) {
             String file = art.get("fileName").asText();
-            if (!file.contains("sources")) return file;
+            if (!file.contains("sources"))
+                return file;
         }
         return null;
     }
@@ -123,10 +145,12 @@ public class UpdateVias {
             while ((n = in.read(buf)) != -1) {
                 out.write(buf, 0, n);
             }
-            System.out.println("New version of " + localName + " downloaded. Please restart the server.");
+            String displayName = getDisplayName(localName);
+            System.out.println(LanguageManager.getInstance().getMessage("download.new_version", "plugin", displayName));
 
         } catch (IOException e) {
-            System.out.println("Error downloading new version of " + localName + "\n" + e);
+            String displayName = getDisplayName(localName);
+            System.out.println(LanguageManager.getInstance().getMessage("download.error", "plugin", displayName, "error", e.getMessage()));
         }
     }
 
@@ -142,7 +166,8 @@ public class UpdateVias {
                 break;
             }
         }
-        if (selected == null && !artifacts.isEmpty()) selected = artifacts.get(0);
+        if (selected == null && !artifacts.isEmpty())
+            selected = artifacts.get(0);
         return selected.get("relativePath").asText();
     }
 

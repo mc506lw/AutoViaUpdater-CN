@@ -5,14 +5,15 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>NewAmazingPVP</groupId>
-    <artifactId>AutoViaUpdater</artifactId>
+    <artifactId>AutoViaUpdater-CN</artifactId>
     <version>10.0.0</version>
     <packaging>jar</packaging>
 
-    <name>AutoViaUpdater</name>
+    <name>AutoViaUpdater-CN</name>
 
-    <description>AutoViaUpdater is a Spigot/BungeeCord plugin that automates the updating of Vias like ViaVersion,
+    <description>AutoViaUpdater-CN is a Spigot/BungeeCord plugin that automates the updating of Vias like ViaVersion,
         ViaRewind, ViaBackwards, and ViaRewind-Legacy.
+        这是一个自动更新ViaVersion、ViaRewind、ViaBackwards、ViaRewind-Legacy的Spigot/BungeeCord插件。
     </description>
     <properties>
         <java.version>1.8</java.version>

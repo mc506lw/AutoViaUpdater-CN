@@ -66,10 +66,11 @@ public class BuildYml {
                 data.put(key, newBuildNumber);
                 writeYamlFile(filePath, data);
                 if (newBuildNumber != -1) {
-                    System.out.println(key + " build number updated to " + newBuildNumber);
+                    System.out.println(LanguageManager.getInstance().getMessage("yaml.build_updated", "key", key,
+                            "build", String.valueOf(newBuildNumber)));
                 }
             } else {
-                System.out.println(key + " not found in the YAML file. Did you touch the versions.yml file? Regenerate it.");
+                System.out.println(LanguageManager.getInstance().getMessage("yaml.key_not_found", "key", key));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -84,7 +85,7 @@ public class BuildYml {
             if (data.containsKey(key)) {
                 return data.get(key);
             } else {
-                System.out.println(key + " not found in the YAML file. Did you touch the versions.yml file? Regenerate it.");
+                System.out.println(LanguageManager.getInstance().getMessage("yaml.key_not_found", "key", key));
                 return -1;
             }
         } catch (IOException e) {
@@ -100,10 +101,10 @@ public class BuildYml {
             if (obj instanceof Map) {
                 return (Map<String, Integer>) obj;
             } else {
-                throw new RuntimeException("Invalid YAML file format. Expected a Map. Did you touch the versions.yml file? Regenerate it.");
+                throw new RuntimeException(LanguageManager.getInstance().getMessage("yaml.invalid_format"));
             }
         } catch (IOException e) {
-            throw new IOException("Error reading YAML file. Did you touch the versions.yml file? Regenerate it.", e);
+            throw new IOException(LanguageManager.getInstance().getMessage("yaml.read_error"), e);
         }
     }
 
