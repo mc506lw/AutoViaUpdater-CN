@@ -19,7 +19,7 @@ public class UpdateVias {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     public static boolean updateVia(String viaName, String dataDirectory, boolean wantSnapshot, boolean isDev,
-            boolean isJava8) throws IOException {
+            boolean isJava8, String customFileName) throws IOException {
         directory = dataDirectory;
 
         String jobPath;
@@ -41,17 +41,18 @@ public class UpdateVias {
 
         int latestBuild = getLatestBuild(jobPath, wantSnapshot);
         if (latestBuild == -1) {
-            System.err.println(LanguageManager.getInstance().getMessage("jenkins.no_build_found", "jobPath", jobPath));
+            LoggerUtil.warning(LanguageManager.getInstance().getMessage("jenkins.no_build_found", "jobPath", jobPath));
             return false;
         }
 
-        String localFileName = buildKey.replace("%20", "-");
+        String localFileName = customFileName != null && !customFileName.isEmpty() ? customFileName.replace(".jar", "")
+                : buildKey.replace("%20", "-");
 
         if (getDownloadedBuild(buildKey) == -1) {
             downloadUpdate(jobPath, latestBuild, localFileName);
             updateBuildNumber(buildKey, latestBuild);
             String displayName = getDisplayName(localFileName);
-            System.out.println(LanguageManager.getInstance().getMessage("download.first_time", "plugin", displayName));
+            LoggerUtil.info(LanguageManager.getInstance().getMessage("download.first_time", "plugin", displayName));
             return true;
 
         } else if (getDownloadedBuild(buildKey) != latestBuild) {
@@ -138,7 +139,7 @@ public class UpdateVias {
         conn.setConnectTimeout(10000);
         conn.setReadTimeout(30000);
         try (InputStream in = conn.getInputStream();
-             FileOutputStream out = new FileOutputStream(outPath)) {
+                FileOutputStream out = new FileOutputStream(outPath)) {
 
             byte[] buf = new byte[1024];
             int n;
@@ -146,11 +147,12 @@ public class UpdateVias {
                 out.write(buf, 0, n);
             }
             String displayName = getDisplayName(localName);
-            System.out.println(LanguageManager.getInstance().getMessage("download.new_version", "plugin", displayName));
+            LoggerUtil.info(LanguageManager.getInstance().getMessage("download.new_version", "plugin", displayName));
 
         } catch (IOException e) {
             String displayName = getDisplayName(localName);
-            System.out.println(LanguageManager.getInstance().getMessage("download.error", "plugin", displayName, "error", e.getMessage()));
+            LoggerUtil.severe(LanguageManager.getInstance().getMessage("download.error", "plugin", displayName, "error",
+                    e.getMessage()));
         }
     }
 

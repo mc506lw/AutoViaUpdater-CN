@@ -11,9 +11,16 @@ commands:
     description: Force update checker for all vias!
     usage: /updatevias
     permission: autoviaupdater.admin
+  autoviaupdater:
+    description: AutoViaUpdater main command
+    usage: /autoviaupdater <reload>
+    permission: autoviaupdater.reload
 permissions:
   autoviaupdater.admin:
     description: Allows using /updatevias and automatic update checks
+    default: op
+  autoviaupdater.reload:
+    description: Allows using /autoviaupdater reload
     default: op
 softdepend:
   - ViaVersion

@@ -31,6 +31,7 @@
     * [Spigot/Bungee (`config.yml`)](#spigotbungee-configyml)
     * [Velocity (`config.toml`)](#velocity-configtoml)
     * [定时任务](#定时任务)
+    * [语言设置](#语言设置)
 * [命令与权限](#命令与权限)
 * [工作原理](#工作原理)
 * [故障排除与常见问题](#故障排除与常见问题)
@@ -88,23 +89,27 @@ ViaVersion:
   snapshot: true   # 最新整体版本；false = 最新非快照版本
   dev: false       # 使用 Jenkins -DEV 构建任务
   java8: false     # 使用 Jenkins -Java8 构建任务
+  fileName: ""     # 自定义下载文件名（留空则使用默认名称）
 
 ViaBackwards:
   enabled: true
   snapshot: true
   dev: false
   java8: false
+  fileName: ""     # 自定义下载文件名（留空则使用默认名称）
 
 ViaRewind:
   enabled: true
   snapshot: true
   dev: false
   java8: false
+  fileName: ""     # 自定义下载文件名（留空则使用默认名称）
 
 ViaRewind-Legacy:
   enabled: true    # 仅限 Spigot
   snapshot: true
   dev: false       # DEV 路径使用 ViaRewind 视图下的 "...%20Support%20DEV"
+  fileName: ""     # 自定义下载文件名（留空则使用默认名称）
 
 # 调度
 Check-Interval: 60        # 分钟；当 cron 为空时使用
@@ -115,6 +120,9 @@ Delay: 5                  # 启动后首次检查前的延迟（秒）
 AutoRestart: false
 AutoRestart-Delay: 60
 AutoRestart-Message: '&c服务器将在 1 分钟后重启！'
+
+# 语言设置 / Language Settings
+Language: zh-CN          # 语言设置：zh-CN（中文）或 en-US（英文）
 ```
 
 ### Velocity (`config.toml`)
@@ -128,23 +136,29 @@ AutoRestart = false
 AutoRestart-Delay = 60
 AutoRestart-Message = '&c服务器将在 1 分钟后重启！'
 
+# 语言设置 / Language Settings
+Language = "zh-CN"        # 语言设置：zh-CN（中文）或 en-US（英文）
+
 [ViaVersion]
 enabled = true
 snapshot = true
 dev = false
 java8 = false
+fileName = ""             # 自定义下载文件名（留空则使用默认名称）
 
 [ViaBackwards]
 enabled = true
 snapshot = true
 dev = false
 java8 = false
+fileName = ""             # 自定义下载文件名（留空则使用默认名称）
 
 [ViaRewind]
 enabled = true
 snapshot = true
 dev = false
 java8 = false
+fileName = ""             # 自定义下载文件名（留空则使用默认名称）
 
 # ViaRewind-Legacy 仅限 Spigot；Velocity 会忽略它
 ```
@@ -157,10 +171,33 @@ java8 = false
 
 如果 cron 为空，插件将使用 `Check-Interval`（分钟）和初始 `Delay`（秒）。
 
+### 语言设置
+
+插件支持多语言，可以在配置文件中设置语言：
+
+* `zh-CN` - 简体中文（默认）
+* `en-US` - 英语
+
+语言文件位于 `plugins/AutoViaUpdater/lang/` 目录下，您可以自定义语言文件中的文本内容。
+
+**首次启动自动检测：**
+
+插件首次启动时会自动检测已安装的 Via 插件，并根据检测到的插件自动配置：
+- 只启用已安装的插件
+- 自动设置下载文件名为当前安装的插件文件名
+- 禁用未安装的插件
+
+**自定义文件名：**
+
+您可以在配置文件中为每个插件设置自定义的下载文件名（`fileName` 参数）。如果留空，插件将使用默认名称。
+
 ## 命令与权限
 
 * `/updatevias` — 立即触发检查
-* 权限：`autoviaupdater.admin`（在 Velocity/Bungee 上需要；在 Spigot 上默认为 OP）
+* `/autoviaupdater reload` — 重新加载配置文件和语言设置
+
+权限：
+* `autoviaupdater.admin` — 使用所有命令（在 Velocity/Bungee 上需要；在 Spigot 上默认为 OP）
 
 ## 工作原理
 
@@ -198,6 +235,12 @@ mvn -DskipTests package
 
 ## 更新日志亮点
 
+* **多语言支持** - 支持中文和英文，可自定义语言文件
+* **首次启动自动检测** - 自动检测已安装的 Via 插件并配置
+* **自定义文件名** - 支持为每个插件设置自定义下载文件名
+* **重载命令** - 新增 `/autoviaupdater reload` 命令重新加载配置
+* **改进的日志系统** - 使用标准日志系统替代 System.out/err
+* **双语注释** - 配置文件支持中英文双语注释
 * Folia 安全调度和 Spigot 上的严格 Bukkit 访问。
 * 清晰的快照选择规则（最新整体版本 vs 仅非快照版本）。
 * 正确的 ViaVersion 和 ViaRewind Legacy Support 的 DEV 构建任务。

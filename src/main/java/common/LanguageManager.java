@@ -2,7 +2,6 @@ package common;
 
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -40,20 +39,28 @@ public class LanguageManager {
             createLanguageFile(filePath, language);
         }
 
+        messages = new HashMap<>();
         try {
             Yaml yaml = new Yaml();
             Object data = yaml.load(Files.newBufferedReader(filePath));
             if (data instanceof Map) {
-                Map<?, ?> rawData = (Map<?, ?>) data;
-                messages = new HashMap<>();
-                for (Map.Entry<?, ?> entry : rawData.entrySet()) {
-                    if (entry.getKey() != null && entry.getValue() != null) {
-                        messages.put(entry.getKey().toString(), entry.getValue().toString());
-                    }
-                }
+                flattenMap((Map<?, ?>) data, "");
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void flattenMap(Map<?, ?> map, String prefix) {
+        for (Map.Entry<?, ?> entry : map.entrySet()) {
+            if (entry.getKey() != null && entry.getValue() != null) {
+                String key = prefix.isEmpty() ? entry.getKey().toString() : prefix + "." + entry.getKey().toString();
+                if (entry.getValue() instanceof Map) {
+                    flattenMap((Map<?, ?>) entry.getValue(), key);
+                } else {
+                    messages.put(key, entry.getValue().toString());
+                }
+            }
         }
     }
 

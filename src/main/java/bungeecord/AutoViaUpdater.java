@@ -2,9 +2,11 @@ package bungeecord;
 
 import common.CronScheduler;
 import common.LanguageManager;
+import common.PluginDetector;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
@@ -15,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static common.BuildYml.createYamlFile;
@@ -30,26 +33,61 @@ public final class AutoViaUpdater extends Plugin {
     public boolean isViaVersionDev;
     public boolean isViaVersionSnapshot;
     public boolean isViaVersionJava8;
+    public String viaVersionFileName;
     public boolean isViaBackwardsEnabled;
     public boolean isViaBackwardsDev;
     public boolean isViaBackwardsSnapshot;
     public boolean isViaBackwardsJava8;
+    public String viaBackwardsFileName;
     public boolean isViaRewindEnabled;
     public boolean isViaRewindDev;
     public boolean isViaRewindSnapshot;
     public boolean isViaRewindJava8;
+    public String viaRewindFileName;
+    private boolean isFirstStartup;
 
     @Override
     public void onEnable() {
         new Metrics(this, 18605);
+        common.LoggerUtil.setLogger(getLogger());
+        isFirstStartup = !new File(getDataFolder(), "config.yml").exists();
         saveDefaultConfig();
         loadConfiguration();
         createYamlFile(getDataFolder().getAbsolutePath(), true);
+
+        if (isFirstStartup) {
+            String language = config.getString("Language", "zh-CN");
+            LanguageManager.init(getDataFolder().getAbsolutePath(), language);
+            detectAndConfigurePlugins();
+            reloadSettings();
+        }
+
         reloadSettings();
-        String language = config.getString("Language", "zh-CN");
-        LanguageManager.init(getDataFolder().getAbsolutePath(), language);
+        if (!isFirstStartup) {
+            String language = config.getString("Language", "zh-CN");
+            LanguageManager.init(getDataFolder().getAbsolutePath(), language);
+        }
         updateChecker();
         ProxyServer.getInstance().getPluginManager().registerCommand(this, new UpdateCommand());
+        ProxyServer.getInstance().getPluginManager().registerCommand(this, new AutoViaUpdaterCommand());
+    }
+
+    private void detectAndConfigurePlugins() {
+        String pluginsFolder = getDataFolder().getParent();
+        Map<String, String> detectedPlugins = PluginDetector.detectInstalledPlugins(pluginsFolder);
+
+        if (!detectedPlugins.isEmpty()) {
+            String configPath = getDataFolder().getAbsolutePath() + File.separator + "config.yml";
+            PluginDetector.updateConfigForDetectedPlugins(configPath, detectedPlugins);
+
+            for (Map.Entry<String, String> entry : detectedPlugins.entrySet()) {
+                String pluginName = entry.getKey();
+                String fileName = entry.getValue();
+                String displayName = pluginName.replace("-", " ");
+                getLogger().info(LanguageManager.getInstance().getMessage("plugin.detected", "plugin", displayName,
+                        "filename", fileName));
+            }
+        }
     }
 
     public void updateChecker() {
@@ -93,14 +131,17 @@ public final class AutoViaUpdater extends Plugin {
         isViaVersionSnapshot = config.getBoolean("ViaVersion.snapshot", true);
         isViaVersionDev = config.getBoolean("ViaVersion.dev", false);
         isViaVersionJava8 = config.getBoolean("ViaVersion.java8", false);
+        viaVersionFileName = config.getString("ViaVersion.fileName", "");
         isViaBackwardsEnabled = config.getBoolean("ViaBackwards.enabled", true);
         isViaBackwardsSnapshot = config.getBoolean("ViaBackwards.snapshot", true);
         isViaBackwardsDev = config.getBoolean("ViaBackwards.dev", false);
         isViaBackwardsJava8 = config.getBoolean("ViaBackwards.java8", false);
+        viaBackwardsFileName = config.getString("ViaBackwards.fileName", "");
         isViaRewindEnabled = config.getBoolean("ViaRewind.enabled", true);
         isViaRewindSnapshot = config.getBoolean("ViaRewind.snapshot", true);
         isViaRewindDev = config.getBoolean("ViaRewind.dev", false);
         isViaRewindJava8 = config.getBoolean("ViaRewind.java8", false);
+        viaRewindFileName = config.getString("ViaRewind.fileName", "");
     }
 
     public void checkUpdateVias() {
@@ -119,22 +160,25 @@ public final class AutoViaUpdater extends Plugin {
             }
             boolean shouldRestart = false;
             if (isViaVersionEnabled
-                    && updatePlugin("ViaVersion", isViaVersionSnapshot, isViaVersionDev, isViaVersionJava8)) {
+                    && updatePlugin("ViaVersion", isViaVersionSnapshot, isViaVersionDev, isViaVersionJava8,
+                            viaVersionFileName)) {
                 shouldRestart = true;
             }
             if (isViaBackwardsEnabled
-                    && updatePlugin("ViaBackwards", isViaBackwardsSnapshot, isViaBackwardsDev, isViaBackwardsJava8)) {
+                    && updatePlugin("ViaBackwards", isViaBackwardsSnapshot, isViaBackwardsDev, isViaBackwardsJava8,
+                            viaBackwardsFileName)) {
                 shouldRestart = true;
             }
             if (isViaRewindEnabled
-                    && updatePlugin("ViaRewind", isViaRewindSnapshot, isViaRewindDev, isViaRewindJava8)) {
+                    && updatePlugin("ViaRewind", isViaRewindSnapshot, isViaRewindDev, isViaRewindJava8,
+                            viaRewindFileName)) {
                 shouldRestart = true;
             }
             if (shouldRestart && config.getBoolean("AutoRestart")) {
                 String raw = config.getString("AutoRestart-Message");
                 String colored = net.md_5.bungee.api.ChatColor.translateAlternateColorCodes('&',
                         raw == null ? "" : raw);
-                getProxy().broadcast(colored);
+                getProxy().broadcast(new TextComponent(colored));
                 getProxy().getScheduler().schedule(this, () -> getProxy().stop(), config.getLong("AutoRestart-Delay"),
                         TimeUnit.SECONDS);
             }
@@ -145,9 +189,10 @@ public final class AutoViaUpdater extends Plugin {
         }
     }
 
-    private boolean updatePlugin(String pluginName, boolean isSnapshot, boolean isDev, boolean isJava8)
+    private boolean updatePlugin(String pluginName, boolean isSnapshot, boolean isDev, boolean isJava8,
+            String customFileName)
             throws IOException {
-        return updateVia(pluginName, getDataFolder().getParent(), isSnapshot, isDev, isJava8);
+        return updateVia(pluginName, getDataFolder().getParent(), isSnapshot, isDev, isJava8, customFileName);
     }
 
     public class UpdateCommand extends Command {
@@ -158,11 +203,53 @@ public final class AutoViaUpdater extends Plugin {
 
         @Override
         public void execute(CommandSender sender, String[] args) {
-            sender.sendMessage(ChatColor.YELLOW + LanguageManager.getInstance().getMessage("command.checking"));
+            sender.sendMessage(
+                    new TextComponent(ChatColor.YELLOW + LanguageManager.getInstance().getMessage("command.checking")));
             getProxy().getScheduler().runAsync(AutoViaUpdater.this, () -> {
                 checkUpdateVias();
-                sender.sendMessage(ChatColor.AQUA + LanguageManager.getInstance().getMessage("command.completed"));
+                sender.sendMessage(new TextComponent(
+                        ChatColor.AQUA + LanguageManager.getInstance().getMessage("command.completed")));
             });
+        }
+    }
+
+    public class AutoViaUpdaterCommand extends Command {
+
+        public AutoViaUpdaterCommand() {
+            super("autoviaupdater", "autoviaupdater.reload");
+        }
+
+        @Override
+        public void execute(CommandSender sender, String[] args) {
+            if (args.length == 0) {
+                sender.sendMessage(new TextComponent(
+                        ChatColor.YELLOW + LanguageManager.getInstance().getMessage("command.usage")));
+                return;
+            }
+
+            if (args[0].equalsIgnoreCase("reload")) {
+                if (!sender.hasPermission("autoviaupdater.reload")) {
+                    sender.sendMessage(new TextComponent(
+                            ChatColor.RED + LanguageManager.getInstance().getMessage("command.no_permission")));
+                    return;
+                }
+
+                sender.sendMessage(new TextComponent(
+                        ChatColor.YELLOW + LanguageManager.getInstance().getMessage("command.reloading")));
+                getProxy().getScheduler().runAsync(AutoViaUpdater.this, () -> {
+                    loadConfiguration();
+                    reloadSettings();
+                    String language = config.getString("Language", "zh-CN");
+                    LanguageManager.init(getDataFolder().getAbsolutePath(), language);
+
+                    sender.sendMessage(new TextComponent(
+                            ChatColor.GREEN + LanguageManager.getInstance().getMessage("command.reloaded")));
+                });
+                return;
+            }
+
+            sender.sendMessage(
+                    new TextComponent(ChatColor.YELLOW + LanguageManager.getInstance().getMessage("command.usage")));
         }
     }
 

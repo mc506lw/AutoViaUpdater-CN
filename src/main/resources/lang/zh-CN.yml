@@ -1,6 +1,10 @@
 command:
   checking: "正在检查 Via 插件更新..."
   completed: "Via 插件更新检查完成！"
+  usage: "用法: /autoviaupdater reload"
+  reloading: "正在重新加载 AutoViaUpdater 配置..."
+  reloaded: "AutoViaUpdater 配置已重新加载！"
+  no_permission: "您没有权限执行此命令！"
 
 download:
   first_time: "{plugin} 已首次下载。请重启服务器以使插件生效。"
@@ -21,3 +25,6 @@ plugin_names:
   viabackwards: "ViaBackwards"
   viarewind: "ViaRewind"
   viarewind_legacy: "ViaRewind-Legacy-Support"
+
+plugin:
+  detected: "检测到已安装的 {plugin} 插件，文件名：{filename}"

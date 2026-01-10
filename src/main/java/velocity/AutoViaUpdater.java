@@ -14,9 +14,11 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import common.CronScheduler;
 import common.LanguageManager;
+import common.PluginDetector;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,6 +26,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Map;
 
 import static common.BuildYml.createYamlFile;
 import static common.BuildYml.updateBuildNumber;
@@ -38,40 +41,58 @@ public final class AutoViaUpdater {
 
     private Toml config;
     private final ProxyServer proxy;
-    private File myFile;
+    private final Logger logger;
     private final Path dataDirectory;
     public boolean isViaVersionEnabled;
     public boolean isViaVersionDev;
     public boolean isViaVersionSnapshot;
     public boolean isViaVersionJava8;
+    public String viaVersionFileName;
     public boolean isViaBackwardsEnabled;
     public boolean isViaBackwardsDev;
     public boolean isViaBackwardsSnapshot;
     public boolean isViaBackwardsJava8;
+    public String viaBackwardsFileName;
     public boolean isViaRewindEnabled;
     public boolean isViaRewindDev;
     public boolean isViaRewindSnapshot;
     public boolean isViaRewindJava8;
+    public String viaRewindFileName;
+    private boolean isFirstStartup;
 
     private final Metrics.Factory metricsFactory;
     private final java.util.concurrent.atomic.AtomicBoolean isChecking = new java.util.concurrent.atomic.AtomicBoolean(
             false);
 
     @Inject
-    public AutoViaUpdater(ProxyServer proxy, @DataDirectory Path dataDirectory, Metrics.Factory metricsFactory) {
+    public AutoViaUpdater(ProxyServer proxy, @DataDirectory Path dataDirectory, Metrics.Factory metricsFactory,
+            Logger logger) {
         this.proxy = proxy;
         this.dataDirectory = dataDirectory;
+        this.logger = logger;
         config = loadConfig(dataDirectory);
         this.metricsFactory = metricsFactory;
     }
 
     @Subscribe
     public void onProxyInitialize(ProxyInitializeEvent event) {
+        common.LoggerUtil.setSlf4jLogger(logger);
+        isFirstStartup = !new File(dataDirectory.toFile(), "config.toml").exists();
         createYamlFile(dataDirectory.toAbsolutePath().toString(), true);
+
+        if (isFirstStartup) {
+            String language = config.getString("Language", "zh-CN");
+            LanguageManager.init(dataDirectory.toAbsolutePath().toString(), language);
+            detectAndConfigurePlugins();
+            reloadSettings();
+        }
+
         metricsFactory.make(this, 18604);
         reloadSettings();
-        String language = config.getString("Language", "zh-CN");
-        LanguageManager.init(dataDirectory.toAbsolutePath().toString(), language);
+        if (!isFirstStartup) {
+            String language = config.getString("Language", "zh-CN");
+            LanguageManager.init(dataDirectory.toAbsolutePath().toString(), language);
+        }
         updateChecker();
         CommandManager commandManager = proxy.getCommandManager();
         CommandMeta commandMeta = commandManager.metaBuilder("updatevias")
@@ -80,6 +101,31 @@ public final class AutoViaUpdater {
 
         SimpleCommand simpleCommand = new UpdateCommand();
         commandManager.register(commandMeta, simpleCommand);
+
+        CommandMeta autoViaUpdaterMeta = commandManager.metaBuilder("autoviaupdater")
+                .plugin(this)
+                .build();
+
+        SimpleCommand autoViaUpdaterCommand = new AutoViaUpdaterCommand();
+        commandManager.register(autoViaUpdaterMeta, autoViaUpdaterCommand);
+    }
+
+    private void detectAndConfigurePlugins() {
+        String pluginsFolder = dataDirectory.getParent().toString();
+        Map<String, String> detectedPlugins = PluginDetector.detectInstalledPlugins(pluginsFolder);
+
+        if (!detectedPlugins.isEmpty()) {
+            String configPath = dataDirectory.toAbsolutePath().toString() + File.separator + "config.toml";
+            PluginDetector.updateTomlConfigForDetectedPlugins(configPath, detectedPlugins);
+
+            for (Map.Entry<String, String> entry : detectedPlugins.entrySet()) {
+                String pluginName = entry.getKey();
+                String fileName = entry.getValue();
+                String displayName = pluginName.replace("-", " ");
+                logger.info(LanguageManager.getInstance().getMessage("plugin.detected", "plugin", displayName,
+                        "filename", fileName));
+            }
+        }
     }
 
     public void updateChecker() {
@@ -109,14 +155,17 @@ public final class AutoViaUpdater {
         isViaVersionSnapshot = getTomlBoolean("ViaVersion", "snapshot", true);
         isViaVersionDev = getTomlBoolean("ViaVersion", "dev", false);
         isViaVersionJava8 = getTomlBoolean("ViaVersion", "java8", false);
+        viaVersionFileName = getTomlString("ViaVersion", "fileName", "");
         isViaBackwardsEnabled = getTomlBoolean("ViaBackwards", "enabled", true);
         isViaBackwardsSnapshot = getTomlBoolean("ViaBackwards", "snapshot", true);
         isViaBackwardsDev = getTomlBoolean("ViaBackwards", "dev", false);
         isViaBackwardsJava8 = getTomlBoolean("ViaBackwards", "java8", false);
+        viaBackwardsFileName = getTomlString("ViaBackwards", "fileName", "");
         isViaRewindEnabled = getTomlBoolean("ViaRewind", "enabled", true);
         isViaRewindSnapshot = getTomlBoolean("ViaRewind", "snapshot", true);
         isViaRewindDev = getTomlBoolean("ViaRewind", "dev", false);
         isViaRewindJava8 = getTomlBoolean("ViaRewind", "java8", false);
+        viaRewindFileName = getTomlString("ViaRewind", "fileName", "");
     }
 
     public void checkUpdateVias() {
@@ -135,15 +184,18 @@ public final class AutoViaUpdater {
             }
             boolean shouldRestart = false;
             if (isViaVersionEnabled
-                    && updatePlugin("ViaVersion", isViaVersionSnapshot, isViaVersionDev, isViaVersionJava8)) {
+                    && updatePlugin("ViaVersion", isViaVersionSnapshot, isViaVersionDev, isViaVersionJava8,
+                            viaVersionFileName)) {
                 shouldRestart = true;
             }
             if (isViaBackwardsEnabled
-                    && updatePlugin("ViaBackwards", isViaBackwardsSnapshot, isViaBackwardsDev, isViaBackwardsJava8)) {
+                    && updatePlugin("ViaBackwards", isViaBackwardsSnapshot, isViaBackwardsDev, isViaBackwardsJava8,
+                            viaBackwardsFileName)) {
                 shouldRestart = true;
             }
             if (isViaRewindEnabled
-                    && updatePlugin("ViaRewind", isViaRewindSnapshot, isViaRewindDev, isViaRewindJava8)) {
+                    && updatePlugin("ViaRewind", isViaRewindSnapshot, isViaRewindDev, isViaRewindJava8,
+                            viaRewindFileName)) {
                 shouldRestart = true;
             }
             if (shouldRestart && config.getBoolean("AutoRestart")) {
@@ -161,9 +213,10 @@ public final class AutoViaUpdater {
         }
     }
 
-    private boolean updatePlugin(String pluginName, boolean isSnapshot, boolean isDev, boolean isJava8)
+    private boolean updatePlugin(String pluginName, boolean isSnapshot, boolean isDev, boolean isJava8,
+            String customFileName)
             throws IOException {
-        return updateVia(pluginName, dataDirectory.getParent().toString(), isSnapshot, isDev, isJava8);
+        return updateVia(pluginName, dataDirectory.getParent().toString(), isSnapshot, isDev, isJava8, customFileName);
     }
 
     private Toml loadConfig(Path path) {
@@ -196,6 +249,14 @@ public final class AutoViaUpdater {
         return b == null ? def : b;
     }
 
+    private String getTomlString(String table, String key, String def) {
+        Toml t = config.getTable(table);
+        if (t == null)
+            return def;
+        String s = t.getString(key);
+        return s == null ? def : s;
+    }
+
     public class UpdateCommand implements SimpleCommand {
         @Override
         public boolean hasPermission(final Invocation invocation) {
@@ -212,6 +273,43 @@ public final class AutoViaUpdater {
                 source.sendMessage(Component.text(LanguageManager.getInstance().getMessage("command.completed"))
                         .color(NamedTextColor.AQUA));
             }).schedule();
+        }
+    }
+
+    public class AutoViaUpdaterCommand implements SimpleCommand {
+        @Override
+        public boolean hasPermission(final Invocation invocation) {
+            return invocation.source().hasPermission("autoviaupdater.reload");
+        }
+
+        @Override
+        public void execute(Invocation invocation) {
+            CommandSource source = invocation.source();
+            String[] args = invocation.arguments();
+
+            if (args.length == 0) {
+                source.sendMessage(Component.text(LanguageManager.getInstance().getMessage("command.usage"))
+                        .color(NamedTextColor.YELLOW));
+                return;
+            }
+
+            if (args[0].equalsIgnoreCase("reload")) {
+                source.sendMessage(Component.text(LanguageManager.getInstance().getMessage("command.reloading"))
+                        .color(NamedTextColor.YELLOW));
+                proxy.getScheduler().buildTask(AutoViaUpdater.this, () -> {
+                    config = loadConfig(dataDirectory);
+                    reloadSettings();
+                    String language = config.getString("Language", "zh-CN");
+                    LanguageManager.init(dataDirectory.toAbsolutePath().toString(), language);
+
+                    source.sendMessage(Component.text(LanguageManager.getInstance().getMessage("command.reloaded"))
+                            .color(NamedTextColor.GREEN));
+                }).schedule();
+                return;
+            }
+
+            source.sendMessage(Component.text(LanguageManager.getInstance().getMessage("command.usage"))
+                    .color(NamedTextColor.YELLOW));
         }
     }
 }

@@ -1,6 +1,10 @@
 command:
   checking: "Checking for Via updates..."
   completed: "Update checker for vias completed!"
+  usage: "Usage: /autoviaupdater reload"
+  reloading: "Reloading AutoViaUpdater configuration..."
+  reloaded: "AutoViaUpdater configuration reloaded!"
+  no_permission: "You don't have permission to execute this command!"
 
 download:
   first_time: "{plugin} was downloaded for the first time. Please restart to let the plugin take effect."
@@ -21,3 +25,6 @@ plugin_names:
   viabackwards: "ViaBackwards"
   viarewind: "ViaRewind"
   viarewind_legacy: "ViaRewind-Legacy-Support"
+
+plugin:
+  detected: "Detected installed {plugin} plugin, filename: {filename}"

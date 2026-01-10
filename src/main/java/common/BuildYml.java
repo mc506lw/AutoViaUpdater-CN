@@ -66,11 +66,11 @@ public class BuildYml {
                 data.put(key, newBuildNumber);
                 writeYamlFile(filePath, data);
                 if (newBuildNumber != -1) {
-                    System.out.println(LanguageManager.getInstance().getMessage("yaml.build_updated", "key", key,
+                    LoggerUtil.info(LanguageManager.getInstance().getMessage("yaml.build_updated", "key", key,
                             "build", String.valueOf(newBuildNumber)));
                 }
             } else {
-                System.out.println(LanguageManager.getInstance().getMessage("yaml.key_not_found", "key", key));
+                LoggerUtil.info(LanguageManager.getInstance().getMessage("yaml.key_not_found", "key", key));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -85,7 +85,7 @@ public class BuildYml {
             if (data.containsKey(key)) {
                 return data.get(key);
             } else {
-                System.out.println(LanguageManager.getInstance().getMessage("yaml.key_not_found", "key", key));
+                LoggerUtil.info(LanguageManager.getInstance().getMessage("yaml.key_not_found", "key", key));
                 return -1;
             }
         } catch (IOException e) {
@@ -94,6 +94,7 @@ public class BuildYml {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private static Map<String, Integer> readYamlFile(Path filePath) throws IOException {
         Yaml yaml = new Yaml();
         try {

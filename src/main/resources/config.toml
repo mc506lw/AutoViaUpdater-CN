@@ -41,6 +41,11 @@ AutoRestart-Message = '&cServer is restarting in 1 minute!'
 # Enable or disable ViaVersion updates (https://ci.viaversion.com/job/ViaVersion)
 # 启用或禁用ViaVersion更新
 enabled = true
+# Custom file name for the downloaded plugin (e.g., "[V]ViaVersion.jar")
+# Leave empty to use default name
+# 自定义下载的插件文件名（如 "[V]ViaVersion.jar"）
+# 留空则使用默认名称
+fileName = ""
 # Download the latest build, regardless of whether it's a snapshot "-SNAPSHOT" or not.
 # Otherwise, download the latest non-snapshot build.
 # 下载最新构建，无论是否为快照"-SNAPSHOT"。否则下载最新的非快照构建。
@@ -54,6 +59,11 @@ java8 = false
 # Enable or disable ViaBackwards updates (https://ci.viaversion.com/view/ViaBackwards/job/ViaBackwards/)
 # 启用或禁用ViaBackwards更新
 enabled = true
+# Custom file name for the downloaded plugin (e.g., "[V]ViaBackwards.jar")
+# Leave empty to use default name
+# 自定义下载的插件文件名（如 "[V]ViaBackwards.jar"）
+# 留空则使用默认名称
+fileName = ""
 # Download the latest build, regardless of whether it's a snapshot "-SNAPSHOT" or not.
 # Otherwise, download the latest non-snapshot build.
 # 下载最新构建，无论是否为快照"-SNAPSHOT"。否则下载最新的非快照构建。
@@ -67,6 +77,11 @@ java8 = false
 # Enable or disable ViaRewind updates (https://ci.viaversion.com/view/ViaRewind/job/ViaRewind/)
 # 启用或禁用ViaRewind更新
 enabled = true
+# Custom file name for the downloaded plugin (e.g., "[V]ViaRewind.jar")
+# Leave empty to use default name
+# 自定义下载的插件文件名（如 "[V]ViaRewind.jar"）
+# 留空则使用默认名称
+fileName = ""
 # Download the latest build, regardless of whether it's a snapshot "-SNAPSHOT" or not.
 # Otherwise, download the latest non-snapshot build.
 # 下载最新构建，无论是否为快照"-SNAPSHOT"。否则下载最新的非快照构建。
@@ -80,6 +95,11 @@ java8 = false
 # Enable or disable ViaRewind-Legacy updates. Note: Will not do anything for Bungeecord servers. (https://ci.viaversion.com/view/ViaRewind/job/ViaRewind%20Legacy%20Support/)
 # 启用或禁用ViaRewind-Legacy更新。注意：对Bungeecord服务器无效。
 enabled = true
+# Custom file name for the downloaded plugin (e.g., "[V]ViaRewind-Legacy.jar")
+# Leave empty to use default name
+# 自定义下载的插件文件名（如 "[V]ViaRewind-Legacy.jar"）
+# 留空则使用默认名称
+fileName = ""
 # Download the latest build, regardless of whether it's a snapshot "-SNAPSHOT" or not.
 # Otherwise, download the latest non-snapshot build.
 # 下载最新构建，无论是否为快照"-SNAPSHOT"。否则下载最新的非快照构建。
